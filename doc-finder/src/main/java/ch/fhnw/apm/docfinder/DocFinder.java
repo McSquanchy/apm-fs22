@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
@@ -88,8 +89,9 @@ public class DocFinder {
     }
 
     private Map<String, List<Integer>> findInText(List<String> searchTerms, String text) {
-        var searchHits = new HashMap<String, List<Integer>>();
-        for (var term : searchTerms) {
+        var searchHits = new ConcurrentHashMap<String, List<Integer>>();
+//        var searchHits = new HashMap<String, List<Integer>>();
+        searchTerms.parallelStream().forEach(term -> {
             var hits = new ArrayList<Integer>();
             var index = 0;
             while (index >= 0) {
@@ -100,7 +102,19 @@ public class DocFinder {
                 }
             }
             searchHits.put(term, hits);
-        }
+        });
+//        for (var term : searchTerms) {
+//            var hits = new ArrayList<Integer>();
+//            var index = 0;
+//            while (index >= 0) {
+//                index = text.indexOf(term, index);
+//                if (index >= 0) {
+//                    hits.add(index);
+//                    index += term.length();
+//                }
+//            }
+//            searchHits.put(term, hits);
+//        }
         return searchHits;
     }
 
